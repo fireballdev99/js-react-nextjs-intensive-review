@@ -42,3 +42,33 @@ node exercises/debounce-throttle.js
 - `1-js-logic-and-async.md` - บันทึกการเรียนรู้และตัวอย่างโค้ด
 
 ---
+
+### Day 2: React & Hooks Optimization
+
+**เป้าหมาย**: จัดการ State และเพิ่มประสิทธิภาพ React เนื่องจากไปฝึกงานมาแล้วรู้สึกเว็บทำงานได้ช้า
+**Location**: `day-2-react/`
+
+#### หัวข้อที่ทบทวน
+
+- [ ] `useReducer()` - จัดการ state ซับซ้อน (login/signup form)
+- [ ] `useMemo()` / `useCallback()` - กรอง list แบบ realtime
+- [ ] `useRef()` - ใช้กับ input focus, timer
+- [ ] Re-render Behavior - เข้าใจ render ที่ไม่จำเป็น
+- [ ] Component Tree Debug - ใช้ React DevTools ดู performance
+- [ ] Custom Hooks - สร้าง `useLocalStorage`, `useFetch`
+- [ ] Context API - จัดการ state ระดับ global
+- [ ] หรืออื่นๆ (เพิ่มในอนาคต)
+
+#### วิธีรัน
+
+```bash
+cd day-2-react
+npm install
+npm run dev
+```
+
+#### Output
+
+- `2-react-hooks-and-optimization.md` - บันทึกการเรียนรู้และ performance tips
+
+---
