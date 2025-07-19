@@ -236,12 +236,16 @@ npm run dev
 
 ### Day 1 - JavaScript
 
-- [ ] เข้าใจ `reduce()` แบบลึก
-- [ ] เรียนรู้ Promise patterns
+- [x] เข้าใจ `reduce()` แบบลึก ✅
+- [x] เรียนรู้ Promise patterns ✅
+- [x] Promise.all() vs Promise.allSettled() ✅
+- [x] Sequential vs Parallel performance ✅
+- [x] Dashboard patterns (Single & Multi-user) ✅
+- [x] Error handling strategies ✅
 - [ ] เข้าใจ Closure และ Currying
 - [ ] ใช้ Debounce/Throttle ได้
 - [ ] เขียน test ด้วย `console.assert()`
-- [ ] เขียน markdown สรุปความรู้
+- [x] เขียน markdown สรุปความรู้ ✅
 
 ### Day 2 - React
 
