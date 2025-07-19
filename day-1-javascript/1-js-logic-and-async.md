@@ -1,7 +1,7 @@
 # Day 1: JavaScript Logic & Async - ทบทวนสิ่งที่ไม่แน่น
 
-> **วันที่**: 13-Jul-2025  
-> **สถานะ**: ✅ เสร็จสิ้น `reduce()` - เข้าใจลึกซึ้งแล้ว
+> **วันที่**: 19-Jul-2025  
+> **สถานะ**: ✅ เข้าใจ `reduce()` และ `Promise.all()` ลึกซึ้งแล้ว - พร้อมไป Level 3 (Promise.race)
 
 ## เป้าหมายวันนี้
 
@@ -370,23 +370,17 @@ const result = array.reduce((acc, item) => {
 - [x] จัดกลุ่มข้อมูล (GroupBy ด้วย reduce)
 - [x] คำนวณ Shopping Cart (qty × price)
 - [x] Object structure ซับซ้อน (items + grandTotal)
+- [x] Promise.all() - Sequential vs Parallel patterns ✅
+- [x] Multi-User Dashboard (Nested Promise.all) ✅
+- [x] Error Handling (Promise.allSettled) ✅
+- [x] Performance optimization (2-4x improvement) ✅
 
-### ตัวอย่างที่อาจจะลองเพิ่ม:
+### หัวข้อถัดไป:
 
-- [ ] หาค่าสูงสุด/ต่ำสุดแบบซับซ้อน
-- [ ] แปลง Array เป็น Map/Set
-- [ ] Flatten nested arrays
-- [ ] Pipeline pattern ด้วย reduce
-
-### หัวข้ออื่น ๆ ที่ยังไม่ได้เรียน:
-
-- [ ] `Promise.all()` / `Promise.race()` - จัดการ async หลายตัว
-- [ ] `closure` & `currying` - แนวคิดขั้นสูง
-- [ ] `debounce` & `throttle` - เพิ่มประสิทธิภาพ
-- [ ] `console.assert()` - testing เบื้องต้น
-- [ ] Array methods chaining - ต่อ methods แบบลื่น
-
----
+- [ ] Promise.race() - Timeout & Fastest server
+- [ ] closure & currying - แนวคิดขั้นสูง
+- [ ] debounce & throttle - เพิ่มประสิทธิภาพ
+- [ ] console.assert() - testing เบื้องต้น
 
 ## บันทึกส่วนตัว
 
@@ -433,3 +427,199 @@ const result = array.reduce((acc, item) => {
 **ไฟล์ที่เกี่ยวข้อง**: `exercises/reduce-examples.js`  
 **ขั้นต่อไป**: `Promise.all()` และ `Promise.race()` - Async patterns  
 **สถานะ**: ✅ เข้าใจ `reduce()` ลึกซึ้งแล้ว - พร้อมไปหัวข้อต่อไป
+
+---
+
+---
+
+## 2. Promise.all() & Promise.allSettled() - จัดการ Async หลายตัว
+
+### ความเข้าใจเดิม (ผิวเผิน)
+
+```javascript
+// ❌ ช้า - รอทีละตัว (Sequential)
+const user = await fetchUser(1); // รอ 100ms
+const posts = await fetchPosts(1); // รอ 150ms
+const albums = await fetchAlbums(1); // รอ 120ms
+// รวม: 370ms
+```
+
+### ความเข้าใจใหม่ (ลึกขึ้น)
+
+```javascript
+// ✅ เร็ว - ดึงพร้อมกัน (Parallel)
+const [user, posts, albums] = await Promise.all([
+  fetchUser(1), // เริ่มเวลา 0ms
+  fetchPosts(1), // เริ่มเวลา 0ms
+  fetchAlbums(1), // เริ่มเวลา 0ms
+]);
+// รวม: 150ms (ตัวที่ช้าที่สุด)
+```
+
+### Performance ที่วัดได้จริง
+
+```javascript
+// ผลการทดสอบจากโค้ดจริง:
+Sequential: 348ms  →  Parallel: 124ms  (เร็วขึ้น 2.8 เท่า!)
+Dashboard Slow: ???ms  →  Dashboard Fast: ???ms
+Profile Card: 138ms  →  Profile Card: 113ms
+Multi-User (10 users): ???ms  →  ???ms (Nested Promise.all)
+```
+
+### ตัวอย่างที่ 1: Dashboard Pattern
+
+```javascript
+// แบบช้า - ดึงทีละตัว
+async function createDashboardSlow(userId) {
+  console.time("Dashboard Slow");
+
+  const user = await fetch(`/users/${userId}`).then((r) => r.json());
+  const posts = await fetch(`/users/${userId}/posts`).then((r) => r.json());
+  const albums = await fetch(`/users/${userId}/albums`).then((r) => r.json());
+
+  console.timeEnd("Dashboard Slow");
+  return { user, posts, albums };
+}
+
+// แบบเร็ว - ดึงพร้อมกัน
+async function createDashboardFast(userId) {
+  console.time("Dashboard Fast");
+
+  const [user, posts, albums] = await Promise.all([
+    fetch(`/users/${userId}`).then((r) => r.json()),
+    fetch(`/users/${userId}/posts`).then((r) => r.json()),
+    fetch(`/users/${userId}/albums`).then((r) => r.json()),
+  ]);
+
+  console.timeEnd("Dashboard Fast");
+  return { user, posts, albums };
+}
+```
+
+### ตัวอย่างที่ 2: Multi-User Dashboard (Advanced)
+
+```javascript
+// Nested Promise.all() - ขั้นสูง
+async function createMultiUserDashboard(userIds) {
+  const result = await Promise.all(
+    userIds.map(async (userId) => {
+      // ชั้นใน: แต่ละ user ดึง 3 APIs พร้อมกัน
+      const [user, posts, albums] = await Promise.all([
+        fetch(`/users/${userId}`).then((r) => r.json()),
+        fetch(`/users/${userId}/posts`).then((r) => r.json()),
+        fetch(`/users/${userId}/albums`).then((r) => r.json()),
+      ]);
+      return { user, posts, albums };
+    })
+  );
+  return result;
+}
+
+// ใช้งาน
+createMultiUserDashboard([1, 2, 3, 4, 5]).then(displayResults);
+```
+
+### ตัวอย่างที่ 3: Error Handling - Promise.allSettled()
+
+```javascript
+async function createSafeDashboard(userId) {
+  console.time("Safe Dashboard");
+
+  try {
+    // Promise.all() - fail fast
+    const results = await Promise.all([
+      fetch(`/users/${userId}`).then((r) => r.json()),
+      fetch(`/invalid-url`).then((r) => r.json()), // จะ error
+      fetch(`/users/${userId}/albums`).then((r) => r.json()),
+    ]);
+    console.log("✅ All success:", results);
+  } catch (error) {
+    console.log("❌ Promise.all() failed:", error.message);
+
+    // Promise.allSettled() - ทุกตัวเสร็จ ไม่สนใจ error
+    const settledResults = await Promise.allSettled([
+      fetch(`/users/${userId}`).then((r) => r.json()),
+      fetch(`/invalid-url`).then((r) => r.json()),
+      fetch(`/users/${userId}/albums`).then((r) => r.json()),
+    ]);
+
+    console.log("🔄 Settled Results:");
+    settledResults.forEach((result, index) => {
+      if (result.status === "fulfilled") {
+        console.log(`✅ API ${index + 1}: Success`);
+      } else {
+        console.log(`❌ API ${index + 1}: ${result.reason.message}`);
+      }
+    });
+  }
+
+  console.timeEnd("Safe Dashboard");
+}
+```
+
+### การใช้งานจริงใน Modern Web Development
+
+#### React/Next.js Dashboard:
+
+```javascript
+// หน้า Dashboard ที่โหลดเร็ว
+async function getServerSideProps({ params }) {
+  const [user, posts, stats, notifications] = await Promise.all([
+    fetchUser(params.userId),
+    fetchUserPosts(params.userId),
+    fetchUserStats(params.userId),
+    fetchNotifications(),
+  ]);
+
+  return { props: { user, posts, stats, notifications } };
+}
+```
+
+#### API Route Optimization:
+
+```javascript
+// /api/dashboard/[userId].js
+export default async function handler(req, res) {
+  const [userResult, postsResult, statsResult] = await Promise.allSettled([
+    getUserFromDB(req.query.userId),
+    getPostsFromDB(req.query.userId),
+    getStatsFromCache(req.query.userId),
+  ]);
+
+  const response = {
+    user: userResult.status === "fulfilled" ? userResult.value : null,
+    posts: postsResult.status === "fulfilled" ? postsResult.value : [],
+    stats: statsResult.status === "fulfilled" ? statsResult.value : {},
+  };
+
+  res.json(response);
+}
+```
+
+### สิ่งที่เรียนรู้
+
+- **Promise.all()** = รอให้เสร็จหมดทุกตัว (fail fast)
+- **Promise.allSettled()** = รอให้เสร็จหมด ไม่สนใจ error
+- **Nested Promise.all()** = Pattern ขั้นสูงสำหรับ multi-level operations
+- **Performance improvement** = 2-4x เร็วขึ้นจากการทำ parallel
+- **Error resilience** = ระบบไม่ crash เมื่อ API บางตัว error
+
+### ข้อผิดพลาดที่เจอและแก้ไข
+
+```javascript
+// ❌ ผิด - ลืม Promise.all()
+const result = await users.map(async (userId) => {
+  return await fetchUser(userId);
+}); // ได้ Array ของ Promise!
+
+// ✅ ถูก - ใช้ Promise.all()
+const result = await Promise.all(
+  users.map(async (userId) => {
+    return await fetchUser(userId);
+  })
+); // ได้ Array ของข้อมูลจริง
+```
+
+**ไฟล์ที่เกี่ยวข้อง**: `exercises/promise-practice.js`  
+**ขั้นต่อไป**: `Promise.race()` และ `Error Handling`
+**สถานะ**: ✅ เข้าใจ `reduce()` และ `Promise.all()` ลึกซึ้งแล้ว - พร้อมไป Level 3 (Promise.race)
